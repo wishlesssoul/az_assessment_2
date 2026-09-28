@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clinical Metadata Ingestion Platform</title>
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">C</div>
+          <div>
+            <h1>Clinical Metadata Ingestion Platform</h1>
+            <small>AI-assisted schema mapping and validation</small>
+          </div>
+        </div>
+        <div class="pill-row">
+          <button class="button secondary" id="loadSample">Load Sample</button>
+          <button class="button primary" id="refreshMetrics">Refresh</button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="nav-group">
+            <div class="nav-label">Overview</div>
+            <button class="nav-item active" data-screen="dashboard"><span class="nav-icon">◉</span>Dashboard</button>
+            <button class="nav-item" data-screen="ingest"><span class="nav-icon">＋</span>Ingestion</button>
+            <button class="nav-item" data-screen="ai"><span class="nav-icon">✦</span>AI Proposals</button>
+            <button class="nav-item" data-screen="dlq"><span class="nav-icon">▣</span>DLQ</button>
+            <button class="nav-item" data-screen="audit"><span class="nav-icon">⎘</span>Event Ledger</button>
+          </div>
+        </aside>
+
+        <main class="content">
+          <div id="notice" class="notice" role="status"></div>
+          <section id="screen-dashboard" class="screen active">
+            <div class="section-head">
+              <h2>Operational Dashboard</h2>
+              <button class="button secondary" id="refreshOverview">Refresh Metrics</button>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Canonical Study Feed</h3>
+                <div id="studyList" class="item-list"></div>
+                <div id="studiesPager"></div>
+              </div>
+              <div class="panel">
+                <h3>AI Schema Review</h3>
+                <div id="summaryList" class="stack"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="screen-ingest" class="screen">
+            <div class="section-head">
+              <h2>Ingest Study Payload</h2>
+            </div>
+            <div class="grid">
+              <div class="panel">
+                <form id="ingestForm">
+                  <div class="field-grid">
+                    <label>Study ID
+                      <input name="studyId" value="NCT-2047" />
+                    </label>
+                    <label>Source
+                      <select name="source">
+                        <option value="clinicaltrials">ClinicalTrials.gov</option>
+                        <option value="regional_csv">Regional CSV</option>
+                        <option value="euctr_csv">EUCTR CSV</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="field-grid">
+                    <label>Title
+                      <input name="title" value="Phase II Oncology Trial - Investigational Agent" />
+                    </label>
+                    <label>Status
+                      <select name="status">
+                        <option value="Active">Active</option>
+                        <option value="Recruiting">Recruiting</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Unknown">Unknown</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="field-grid">
+                    <label>Phase
+                      <input name="phase" value="Phase II" />
+                    </label>
+                    <label>Target Enrollment
+                      <input name="targetEnrollment" value="180" />
+                    </label>
+                  </div>
+                  <div class="field-grid">
+                    <label>Country
+                      <input name="country" value="United States" />
+                    </label>
+                    <label>Study Type
+                      <input name="studyType" value="Interventional" />
+                    </label>
+                  </div>
+                  <div class="pill-row">
+                    <button type="submit" class="button primary">Submit to Ingestion</button>
+                    <button type="button" class="button secondary" id="fillSamplePayload">Use Sample Payload</button>
+                  </div>
+                </form>
+              </div>
+              <div class="panel">
+                <h3>Validation Rules</h3>
+                <div class="stack">
+                  <div class="proposal-box"><strong>Schema contract</strong><div class="muted">studyId, title, status, phase, targetEnrollment</div></div>
+                  <div class="proposal-box"><strong>Zero-loss principle</strong><div class="muted">All ingested rows are added to the immutable append-only event log.</div></div>
+                  <div class="proposal-box"><strong>Human-in-the-loop</strong><div class="muted">Unknown or ambiguous payloads are paused for data steward approval.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel import-panel">
+              <h3>Bulk Import from CSV or JSON</h3>
+              <p class="muted">Upload a CSV with a header row or a JSON array / <code>{"records": [...]}</code>. Every row uses the same validation, event ledger, and DLQ workflow as manual ingestion.</p>
+              <div class="pill-row" style="margin-bottom:12px;">
+                <a class="button secondary" href="/samples/sample-studies.csv" download>Download sample CSV</a>
+                <a class="button secondary" href="/samples/sample-studies.json" download>Download sample JSON</a>
+              </div>
+              <form id="fileImportForm">
+                <label>Select a .csv or .json file
+                  <input id="importFile" name="importFile" type="file" accept=".csv,.json,text/csv,application/json" required />
+                </label>
+                <div class="pill-row">
+                  <button type="submit" class="button primary" id="importFileButton">Import file</button>
+                  <span id="importFileStatus" class="muted" aria-live="polite"></span>
+                </div>
+              </form>
+              <div id="fileImportResults" class="stack" style="margin-top:12px;" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <section id="screen-ai" class="screen">
+            <div class="section-head">
+              <h2>AI Schema Proposals</h2>
+            </div>
+            <div class="panel">
+              <div id="proposalList" class="stack"></div>
+              <div id="proposalsPager"></div>
+            </div>
+          </section>
+
+          <section id="screen-dlq" class="screen">
+            <div class="section-head">
+              <h2>Dead Letter Queue</h2>
+            </div>
+            <div class="panel">
+              <div id="dlqList" class="stack"></div>
+              <div id="dlqPager"></div>
+            </div>
+          </section>
+
+          <section id="screen-audit" class="screen">
+            <div class="section-head">
+              <h2>Immutable Event Ledger</h2>
+            </div>
+            <div class="panel">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Seq</th>
+                    <th>Event</th>
+                    <th>Entity</th>
+                    <th>Actor</th>
+                    <th>Timestamp</th>
+                    <th>Hash</th>
+                  </tr>
+                </thead>
+                <tbody id="eventTableBody"></tbody>
+              </table>
+              <div id="eventsPager"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

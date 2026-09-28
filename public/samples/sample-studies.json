@@ -1,0 +1,20 @@
+[
+  {
+    "study_id": "NCT-SAMPLE-JSON-001",
+    "title": "CardioMetabolic Outcomes Study",
+    "status": "Recruiting",
+    "phase": "Phase III",
+    "target_enrollment": 500,
+    "country": "Canada",
+    "source": "clinicaltrials"
+  },
+  {
+    "study_id": "NCT-SAMPLE-JSON-002",
+    "title": "Immunotherapy Biomarker Trial",
+    "status": "Active",
+    "phase": "Phase II",
+    "target_enrollment": 220,
+    "country": "United States",
+    "source": "clinicaltrials"
+  }
+]

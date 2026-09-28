@@ -1,0 +1,18 @@
+{
+  "name": "clinical-metadata-ingestion-platform",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Production-grade clinical research metadata ingestion and steward review platform",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parse": "^7.0.3",
+    "express": "^4.19.2"
+  }
+}
